@@ -13,6 +13,12 @@ builder.Services.AddDbContext<BookstoreContext>(options =>
 
 builder.Services.AddScoped<IBookRepository, EFBookRepository>();
 
+builder.Services.AddRazorPages();
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession();
+
 var app = builder.Build();
 
 
@@ -27,6 +33,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseRouting();
 
 app.UseAuthorization();
@@ -34,8 +42,8 @@ app.UseAuthorization();
 app.MapControllerRoute("pagenumandtype", "{bookCat}/{pageNum}", new { Controller = "Home", action = "Index" });
 app.MapControllerRoute("bookCat", "{bookCat}", new { Controller = "Home", action = "Index", pageNum = 1 });
 app.MapControllerRoute("pagination", "{pageNum}", new {Controller = "Home", action = "Index", pageNum = 1});
-
-
 app.MapDefaultControllerRoute();
+
+app.MapRazorPages();
 
 app.Run();
