@@ -14,13 +14,14 @@ namespace JNmish11.Controllers
             _repo = temp;
         }
 
-        public IActionResult Index(int pageNum)
+        public IActionResult Index(int pageNum, string? bookCat)
         {
-            int pageSize = 10;
+            int pageSize = 5;
 
             var info = new BooksListViewModel
             {
                 Books = _repo.Books
+                .Where(x => x.Category == bookCat || bookCat == null)
                 .OrderBy(x => x.Title)
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize),
@@ -29,8 +30,10 @@ namespace JNmish11.Controllers
                 {
                     CurrentPage = pageNum,
                     ItemsPerPage = pageSize,
-                    TotalItems = _repo.Books.Count()
-                }
+                    TotalItems = bookCat == null ? _repo.Books.Count() : _repo.Books.Where(x => x.Category == bookCat).Count()
+                },
+
+                CurrentBookCat = bookCat
             };
 
             return View(info);
