@@ -8,30 +8,41 @@ namespace JNmish11.Pages
     public class AddCartModel : PageModel
     {
         private IBookRepository _repo;
-        public AddCartModel(IBookRepository temp)
+        public Cart? Cart { get; set; }
+        public AddCartModel(IBookRepository temp, Cart cartService)
         {
             _repo = temp;
+            Cart = cartService;
         }
 
-        public Cart? Cart { get; set; }
-        public void OnGet()
+
+        public string ReturnUrl { get; set; } = "/";
+        public void OnGet(string returnUrl)
         {
-            Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
+            ReturnUrl = returnUrl ?? "/";
+            //Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
         }
 
-        public void OnPost(int bookId)
+        public IActionResult OnPost(int bookId, string returnUrl)
         {
             Book book = _repo.Books
                 .FirstOrDefault(x => x.BookId == bookId);
 
             if (book != null)
             {
-                Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
+                //Cart = HttpContext.Session.GetJson<Cart>("cart") ?? new Cart();
+                Cart.AddItem(book, 1);
+                //HttpContext.Session.SetJson("cart", Cart);
             }
 
-            Cart.AddItem(book, 1);
+            return RedirectToPage (new {returnUrl = ReturnUrl});
+            
+        }
 
-            HttpContext.Session.SetJson("cart", Cart);
+        public IActionResult OnPostRemove(int bookId, string returnUrl)
+        {
+            Cart.RemoveLine(Cart.Lines.First(x => x.Book.BookId == bookId).Book);
+            return RedirectToPage (new {returnUrl = returnUrl});
         }
     }
 }
